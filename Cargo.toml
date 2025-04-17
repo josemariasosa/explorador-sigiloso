@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "explorador_sigiloso_api",
+    "explorador_sigiloso_ui"
+]

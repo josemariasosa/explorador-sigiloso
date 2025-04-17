@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  bitcoin:
+    image: bitcoin/bitcoin:latest
+    container_name: bitcoin-mainnet
+    restart: unless-stopped
+    ports:
+      - "8332:8332" # RPC port for mainnet
+      - "8333:8333" # P2P port for mainnet
+    volumes:
+      - /Volumes/nodo-sigilo/bitcoin-data:/home/bitcoin/.bitcoin
+    command:
+      -printtoconsole
+      -rpcallowip=0.0.0.0/0
+      -rpcbind=0.0.0.0
+      -rpcuser=bitcoin
+      -rpcpassword=bitcoin123
+      -txindex=1

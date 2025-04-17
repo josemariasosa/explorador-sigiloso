@@ -1,0 +1,9 @@
+[package]
+name = "explorador_sigiloso_ui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+leptos = { version = "0.7.8", features = ["csr"] }
+reqwest = { version = "0.12.15", features = ["json"] }
+serde_json = "1.0"

@@ -1,96 +1,171 @@
 # Nodo Sigiloso Infra
 
-docs:
+> Infrastructure setup for running a full Bitcoin node and the [`explorador-sigiloso`](https://github.com/josemariasosa/explorador-sigiloso) dashboard on a local or dedicated Linux server (physical or virtual).
 
-- https://hub.docker.com/r/bitcoin/bitcoin
+---
 
+## 💾 Format the External SSD
 
-docker ps
-docker logs -f bitcoin-testnet
+This assumes the external SSD has been connected to the VM or physical server. You'll format it with EXT4 so Bitcoin Core can write to it efficiently.
 
-curl --user bitcoin:bitcoin123 --data-binary '{"jsonrpc":"1.0","id":"test","method":"getblockchaininfo","params":[]}' \
-  -H 'content-type:text/plain;' http://localhost:18332/
+```bash
+# Start a temporary Debian container with disk access
+docker-compose up -d debian
+docker exec -it debian-formatter bash
 
-{"result":{"chain":"test","blocks":0,"headers":0,"bestblockhash":"000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943","difficulty":1,"time":1296688602,"mediantime":1296688602,"verificationprogress":3.905231570194885e-09,"initialblockdownload":true,"chainwork":"0000000000000000000000000000000000000000000000000000000100010001","size_on_disk":293,"pruned":false,"warnings":[]},"error":null,"id":"test"}
+# Install necessary tools
+apt update && apt install -y util-linux e2fsprogs procps lsof
 
-Step 2: Load your Bitcoin Core wallet (if not done yet)
-bash
-Copy
-Edit
-```sh
-docker ps
-docker-compose up -d
+# List block devices
+lsblk
 
-docker exec -it bitcoin-testnet bitcoin-cli -testnet -rpcuser=bitcoin -rpcpassword=bitcoin123 createwallet default
-docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 createwallet default
-
-# check the status of the node
-docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getblockchaininfo
-{
-  "chain": "main",
-  "blocks": 193868,
-  "headers": 892878,
-  "bestblockhash": "00000000000005478a33ec50952f514f323f80c0677c7055f8d570e46380f71c",
-  "difficulty": 2190865.970102859,
-  "time": 1344956751,
-  "mediantime": 1344954130,
-  "verificationprogress": 0.004956699604573066,
-  "initialblockdownload": true,
-  "chainwork": "0000000000000000000000000000000000000000000000173478f6c50d31e393",
-  "size_on_disk": 2948976382,
-  "pruned": false,
-  "warnings": [
-  ]
-}
-
+# Format the drive (⚠️ make sure it's the correct one)
+mkfs.ext4 /dev/sda -L bitcoin_data
 ```
 
-Query the blockchain to get the LAST BLOCK.
+Then, on the host system:
 
-```sh
-✅ 1. Get the latest block hash
+```bash
+# Mount the newly formatted SSD
+sudo mkdir -p /mnt/bitcoin-data
+sudo mount /dev/sda /mnt/bitcoin-data
+```
 
+---
+
+## 🐳 Docker Compose
+
+Your server should have Docker and Docker Compose installed. Then clone the repo:
+
+```bash
+git clone git@github.com:josemariasosa/explorador-sigiloso.git
+cd explorador-sigiloso
+```
+
+Sample `docker-compose.yml` (Bitcoin node + API):
+
+```yaml
+services:
+  bitcoin:
+    image: bitcoin/bitcoin:latest
+    container_name: bitcoin-mainnet
+    restart: unless-stopped
+    ports:
+      - "8332:8332"  # RPC
+      - "8333:8333"  # P2P
+    volumes:
+      - /mnt/bitcoin-data:/home/bitcoin/.bitcoin
+    command:
+      -printtoconsole
+      -rpcallowip=0.0.0.0/0
+      -rpcbind=0.0.0.0
+      -rpcuser=bitcoin
+      -rpcpassword=bitcoin123
+      -txindex=1
+
+  explorador_api:
+    build:
+      context: ./explorador_sigiloso_api
+    container_name: explorador-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      BTC_RPC_URL: http://bitcoin:8332
+      BTC_RPC_USER: bitcoin
+      BTC_RPC_PASS: bitcoin123
+    command: ["cargo", "run", "--release"]
+```
+
+---
+
+## 🛠️ Load Wallets
+
+```bash
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 createwallet default
+```
+
+---
+
+## 🧪 Test Bitcoin Node Status
+
+```bash
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getblockchaininfo
+```
+
+---
+
+## 🔍 Query Blockchain Data
+
+### From Bitcoin CLI:
+
+```bash
+# Get latest block hash
 docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getbestblockhash
 
-000000000000002f7dae984ed518b68bde8d9d5ef666eae58d1a6bc11136fed1
-
-✅ 2. Fetch the block by hash
-
-docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getblock 000000000000002f7dae984ed518b68bde8d9d5ef666eae58d1a6bc11136fed1 2
+# Get block details (verbosity 2)
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getblock <BLOCK_HASH> 2
 ```
 
-curl http://localhost:3000/btc/balance/yourbtcaddresshere
+### From Explorador API (Axum):
 
-
-# test the running node
-curl --user bitcoin:bitcoin123 \
-  --data-binary '{"jsonrpc":"1.0","id":"btcbalance","method":"getbalance","params":[]}' \
-  -H 'content-type:text/plain;' http://localhost:8332/
-
+```bash
+curl http://localhost:3000/btc/balance/1K8jWKBgWU2L1zvBbTn4G3vMyJx8Ra1J6G
 ```
 
+---
 
-Step 3: Import the address or private key
-👉 Option A: Import just the address (for watching only)
-bash
-Copy
-Edit
-docker exec -it bitcoin-testnet bitcoin-cli -testnet -rpcuser=bitcoin -rpcpassword=bitcoin123 importaddress "tb1q...." "mywatchaddr" false
-👉 Option B: Import the private key (you'll be able to spend/test from it)
-bash
-Copy
-Edit
-docker exec -it bitcoin-testnet bitcoin-cli -testnet -rpcuser=bitcoin -rpcpassword=bitcoin123 importprivkey "cTp...." "mykey" false
-The "false" at the end skips rescan for speed. If you want to scan past UTXOs, set it to true.
+## 🧠 Wallet Tips
 
-Step 4: Verify it's working
-bash
-Copy
-Edit
-docker exec -it bitcoin-testnet bitcoin-cli -testnet -rpcuser=bitcoin -rpcpassword=bitcoin123 getwalletinfo
-Then test your API again:
+### Import a watch-only address:
 
-bash
-Copy
-Edit
-curl http://localhost:3000/btc/balance/yourTestnetAddress
+```bash
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 importaddress "bc1q..." "watchaddr" false
+```
+
+### Import a private key:
+
+```bash
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 importprivkey "cTp..." "mykey" false
+```
+
+---
+
+## 🔐 Check Wallet Info
+
+```bash
+docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoin123 getwalletinfo
+```
+
+---
+
+## 📡 Test JSON-RPC Directly
+
+```bash
+curl --user bitcoin:bitcoin123   --data-binary '{"jsonrpc":"1.0","id":"test","method":"getblockchaininfo","params":[]}'   -H 'content-type:text/plain;'   http://localhost:8332/
+```
+
+---
+
+## ✅ Status Check
+
+```bash
+# Running containers
+docker ps
+
+# Live logs
+docker logs -f bitcoin-mainnet
+docker logs -f explorador-api
+```
+
+---
+
+### 👋 Final Notes
+
+- This setup is for **mainnet**. If you're testing, replace `bitcoin-mainnet` with `bitcoin-testnet` and add `-testnet` to the command flags.
+- The VM is your current host — you can later migrate this setup to a physical server with minimal changes.
+- 1TB SSD is required for Bitcoin mainnet. Plan ahead for ETH if needed.
+
+---
+
+Made with ☕, 🧠, and a squirrel’s stubbornness.

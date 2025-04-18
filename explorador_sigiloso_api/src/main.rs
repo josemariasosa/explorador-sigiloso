@@ -1,4 +1,5 @@
 mod btc;
+mod utils;
 
 use axum::{
     routing::get,

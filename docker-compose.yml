@@ -6,10 +6,10 @@ services:
     container_name: bitcoin-mainnet
     restart: unless-stopped
     ports:
-      - "8332:8332" # RPC port for mainnet
-      - "8333:8333" # P2P port for mainnet
+      - "8332:8332"  # RPC
+      - "8333:8333"  # P2P
     volumes:
-      - /Volumes/nodo-sigilo/bitcoin-data:/home/bitcoin/.bitcoin
+      - /mnt/bitcoin-data:/home/bitcoin/.bitcoin
     command:
       -printtoconsole
       -rpcallowip=0.0.0.0/0
@@ -17,3 +17,16 @@ services:
       -rpcuser=bitcoin
       -rpcpassword=bitcoin123
       -txindex=1
+
+  explorador_api:
+    build:
+      context: ./explorador_sigiloso_api
+    container_name: explorador-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      BTC_RPC_URL: http://bitcoin:8332
+      BTC_RPC_USER: bitcoin
+      BTC_RPC_PASS: bitcoin123
+    command: ["cargo", "run", "--release"]

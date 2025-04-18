@@ -79,8 +79,7 @@ services:
       BTC_RPC_USER: bitcoin
       BTC_RPC_PASS: bitcoin123
     command: ["cargo", "run", "--release"]
-    depends_on:
-      - bitcoin
+    
 ```
 
 ---
@@ -158,6 +157,9 @@ curl --user bitcoin:bitcoin123   --data-binary '{"jsonrpc":"1.0","id":"test","me
 ```bash
 # Running containers
 docker ps
+
+✅ Run only the bitcoin service:
+docker compose up -d bitcoin
 
 # Live logs
 docker logs -f bitcoin-mainnet

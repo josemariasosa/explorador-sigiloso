@@ -1,6 +1,12 @@
 mod btc;
 mod utils;
 
+use btc::rpc::create_rpc_client;
+use std::sync::Arc;
+
+use std::env;
+
+
 use axum::{
     routing::get,
     Router,
@@ -9,26 +15,19 @@ use axum::{
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().expect("Failed to load .env file");
+
+    let bitcoin_url = env::var("BTC_RPC_URL").expect("BTC_RPC_URL not set");
+    let rpc_client = Arc::new(create_rpc_client());
+    let app_state = rpc_client.clone();
 
     // build our application with a single route
-    let app = Router::new().route("/btc/balance/{address}", get(btc::get_balance));
+    let app = Router::new()
+        .route("/btc/balance/{address}", get(btc::handlers::get_balance))
+        .with_state(app_state);
 
     // run our app with hyper, listening globally on port 3000
-    // let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(bitcoin_url).await.unwrap();
     println!("🚀 Explorador Sigiloso API running at http://{:?}/", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
-
-
-
-
-
-    // let app = Router::new()
-    //     .route("/btc/balance/:address", get(btc::get_balance));
-
-    // let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    // axum::Server::bind(&addr)
-    //     .serve(app.into_make_service())
-    //     .await
-    //     .unwrap();
 }

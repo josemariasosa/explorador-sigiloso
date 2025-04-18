@@ -1,6 +1,8 @@
+use axum::extract::State;
 use axum::{extract::Path, Json};
-use bitcoincore_rpc::{Auth, Client, RpcApi};
+use bitcoincore_rpc::{Client, RpcApi};
 use serde::Serialize;
+use std::sync::Arc;
 
 // use std::str::FromStr;
 use bitcoin::{Address, Network};
@@ -24,14 +26,10 @@ struct BlockDelta {
     total_input_sats: u64,
 }
 
-
-pub async fn get_balance(Path(address): Path<String>) -> Json<BalanceResponse> {
-    // Connect to the testnet node
-    let rpc = Client::new(
-        "http://127.0.0.1:8332", // 8332 for mainnet
-        Auth::UserPass("bitcoin".to_string(), "bitcoin123".to_string()),
-    ).expect("Failed to connect to Bitcoin RPC");
-
+pub async fn get_balance(
+    Path(address): Path<String>,
+    State(rpc): State<Arc<Client>>,
+) -> Json<BalanceResponse> {
     // List unspent and filter by address
     let address: Address<NetworkUnchecked> = address.parse().unwrap();
     let address: Address<NetworkChecked> = address.require_network(Network::Bitcoin).unwrap();
@@ -45,8 +43,5 @@ pub async fn get_balance(Path(address): Path<String>) -> Json<BalanceResponse> {
 
     let total: u64 = unspent.iter().map(|o| o.amount.to_sat()).sum();
 
-    Json(BalanceResponse {
-        address: address,
-        balance: total,
-    })
+    Json(BalanceResponse {address: address, balance: total})
 }

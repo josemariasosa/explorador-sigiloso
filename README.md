@@ -161,6 +161,9 @@ docker ps
 ✅ Run only the bitcoin service:
 docker compose up -d bitcoin
 
+# run the explorador_api
+docker compose up -d --build
+
 # Live logs
 docker logs -f bitcoin-mainnet
 docker logs -f explorador-api

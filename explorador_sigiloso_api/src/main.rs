@@ -28,6 +28,6 @@ async fn main() {
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind(explorador_url).await.unwrap();
-    println!("🚀 Explorador Sigiloso API running at http://{:?}/", listener.local_addr().unwrap());
+    println!("🚀 Explorador Sigiloso API running at ", explorador_url);
     axum::serve(listener, app).await.unwrap();
 }

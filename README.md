@@ -115,7 +115,7 @@ docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoi
 ### From Explorador API (Axum):
 
 ```bash
-curl http://localhost:3000/btc/balance/1K8jWKBgWU2L1zvBbTn4G3vMyJx8Ra1J6G
+curl http://localhost:3000/btc/balance/1DrK44np3gMKuvcGeFVv9Jk67zodP52eMu
 ```
 
 ---

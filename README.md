@@ -29,6 +29,10 @@ Then, on the host system:
 # Mount the newly formatted SSD
 sudo mkdir -p /mnt/bitcoin-data
 sudo mount /dev/sda /mnt/bitcoin-data
+
+df -h /mnt/bitcoin-data/
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda        916G   28K  870G   1% /mnt/bitcoin-data
 ```
 
 ---
@@ -75,6 +79,8 @@ services:
       BTC_RPC_USER: bitcoin
       BTC_RPC_PASS: bitcoin123
     command: ["cargo", "run", "--release"]
+    depends_on:
+      - bitcoin
 ```
 
 ---

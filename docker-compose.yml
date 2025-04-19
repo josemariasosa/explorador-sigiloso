@@ -7,7 +7,7 @@ services:
       - "8332:8332"  # RPC
       - "8333:8333"  # P2P
     volumes:
-      - /mnt/bitcoin-data:/home/bitcoin/.bitcoin
+      - /mnt/bitcoin-data/bitcoin-node:/home/bitcoin/.bitcoin
     # This commands are now in the /mnt/bitcoin-data/bitcoin.conf file
     # command:
     #   -printtoconsole

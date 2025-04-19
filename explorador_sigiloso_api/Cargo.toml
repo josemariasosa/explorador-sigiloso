@@ -11,3 +11,6 @@ tokio = { version = "1", features = ["full"] }
 bitcoincore-rpc = "0.19.0"
 bitcoin = "0.32.5"
 dotenvy = "0.15"
+# Enable JSON + TLS support (or native-tls, rustls, whatever you prefer)
+reqwest = { version = "0.12.15", features = ["json", "rustls-tls"] }
+

@@ -33,3 +33,23 @@ services:
     command: ["cargo", "run", "--release"]
     depends_on:
       - bitcoin
+
+  # Esplora indexer (backend)
+  esplora-indexer:
+    build:
+      context: ./lib/esplora
+      target: indexer
+    container_name: esplora-indexer
+    restart: unless-stopped
+    depends_on: [bitcoin]
+    environment:
+      - NETWORK=bitcoin
+      - BITCOIN_RPC_URL=http://bitcoin:8332
+      - BITCOIN_RPC_USER=bitcoin
+      - BITCOIN_RPC_PASS=bitcoin123
+      - DB_DIR=/data
+    volumes:
+      # place Esplora’s DB on the same SSD
+      - /mnt/bitcoin-data/esplora-db:/data
+    ports:
+      - "3002:3002"    # explorer‑indexer HTTP

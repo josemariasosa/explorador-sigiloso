@@ -1,4 +1,7 @@
 use serde::Serialize;
+use std::sync::Arc;
+use bitcoincore_rpc::Client as BtcRpcClient;
+use reqwest::Client as HttpClient;
 
 #[derive(Serialize)]
 pub struct BalanceResponse {
@@ -17,4 +20,14 @@ pub struct BlockDelta {
     pub spent_addresses: Vec<(String, u64)>,
     pub total_output_sats: u64,
     pub total_input_sats: u64,
+}
+
+#[derive(Clone)]
+pub struct AppState {
+    /// Bitcoin‐Core RPC client
+    pub btc: Arc<BtcRpcClient>,
+    /// an HTTP client for Esplora
+    pub esplora: HttpClient,
+    /// base URL for the Esplora‐indexer service
+    pub esplora_url: String,
 }

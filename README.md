@@ -117,6 +117,7 @@ docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoi
 ```bash
 curl http://localhost:3000/btc/balance/1DrK44np3gMKuvcGeFVv9Jk67zodP52eMu
 curl http://localhost:3000/btc/last-block-delta
+curl http://localhost:3000/btc/block-txs/{block_hash}
 ```
 
 ---
@@ -355,5 +356,36 @@ The fewer forced actions you take (pulling cables, killing VMs), the more peace 
 - 1TB SSD is required for Bitcoin mainnet. Plan ahead for ETH if needed.
 
 ---
+
+---
+
+## 💾 Esplora Indexer Data Directory
+
+> All Esplora’s index data lives alongside your chain data on the SSD at:
+
+**Host path**: `/mnt/bitcoin-data/esplora-db`
+
+Docker‑Compose will auto‑create this folder if it doesn’t exist, but you should:
+
+1. **Verify the parent mount** is active:
+   ```bash
+   mount | grep /mnt/bitcoin-data
+   ```
+2. **Check (or create) the directory** and set permissions:
+   ```bash
+   sudo mkdir -p /mnt/bitcoin-data/esplora-db
+   sudo chown 1000:1000 /mnt/bitcoin-data/esplora-db
+   ```
+   > Adjust UID:GID to match the user your container runs as (often `1000:1000`).
+
+3. In your `docker-compose.yml`, it’s mounted as:
+   ```yaml
+   volumes:
+     - /mnt/bitcoin-data/esplora-db:/data
+   ```
+4. **💡 Tip**: Keep an eye on its size with `du -sh /mnt/bitcoin-data/esplora-db`.
+
+Now your Esplora indexer has a stable home on the SSD—no surprises when you spin it up!  
+
 
 Made with ☕, 🧠, and a squirrel’s stubbornness.

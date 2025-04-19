@@ -43,6 +43,8 @@ pub async fn get_block_delta(
 }
 
 fn get_block_delta_core(rpc: &Client, block_hash: &BlockHash) -> Json<BlockDelta> {
+    println!("🔍 get_block_delta_core called for block hash: {}", block_hash);
+
     let block = rpc.get_block(block_hash).expect("Failed to get block");
     let height = rpc.get_block_info(block_hash).unwrap().height;
     let coinbase_tx = block.txdata.first().expect("Block has no transactions");
@@ -58,7 +60,13 @@ fn get_block_delta_core(rpc: &Client, block_hash: &BlockHash) -> Json<BlockDelta
     let mut received_map: HashMap<String, u64> = HashMap::new();
     let mut spent_map: HashMap<String, u64> = HashMap::new();
 
+    println!(
+        "📦 BlockDelta: height={}, outputs={}, inputs={}, rewards={}",
+        height, total_output, total_input, coinbase_reward_sats
+    );
+
     for tx in &block.txdata {
+        println!("⛏️ processing tx: {}", tx.txid());
         for o in &tx.output {
             total_output += o.value.to_sat();
             if let Ok(addr) = Address::from_script(&o.script_pubkey, Network::Bitcoin) {

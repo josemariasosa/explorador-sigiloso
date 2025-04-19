@@ -116,6 +116,7 @@ docker exec -it bitcoin-mainnet bitcoin-cli -rpcuser=bitcoin -rpcpassword=bitcoi
 
 ```bash
 curl http://localhost:3000/btc/balance/1DrK44np3gMKuvcGeFVv9Jk67zodP52eMu
+curl http://localhost:3000/btc/last-block-delta
 ```
 
 ---

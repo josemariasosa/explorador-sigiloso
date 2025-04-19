@@ -40,12 +40,17 @@ services:
     depends_on:
       - bitcoin
     environment:
-      - NETWORK=bitcoin
+      - NETWORK=bitcoin-mainnet
       - BITCOIN_RPC_URL=http://bitcoin:8332
       - BITCOIN_RPC_USER=bitcoin
       - BITCOIN_RPC_PASS=bitcoin123
       - DB_DIR=/data
+      - RUST_LOG=info                 # optional: more verbose logs
     volumes:
       - /mnt/bitcoin-data/esplora-db:/data
+    command:
+      - bash
+      - -c
+      - /srv/explorer/run.sh bitcoin-mainnet explorer
     ports:
       - "3002:3002"

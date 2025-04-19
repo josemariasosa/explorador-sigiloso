@@ -10,13 +10,14 @@ services:
       - "8333:8333"  # P2P
     volumes:
       - /mnt/bitcoin-data:/home/bitcoin/.bitcoin
-    command:
-      -printtoconsole
-      -rpcallowip=0.0.0.0/0
-      -rpcbind=0.0.0.0
-      -rpcuser=bitcoin
-      -rpcpassword=bitcoin123
-      -txindex=1
+    # This commands are now in the /mnt/bitcoin-data/bitcoin.conf file
+    # command:
+    #   -printtoconsole
+    #   -rpcallowip=0.0.0.0/0
+    #   -rpcbind=0.0.0.0
+    #   -rpcuser=bitcoin
+    #   -rpcpassword=bitcoin123
+    #   -txindex=1
 
   explorador_api:
     build:

@@ -1,3 +1,0 @@
-[submodule "lib/esplora"]
-	path = lib/esplora
-	url = https://github.com/Blockstream/esplora.git

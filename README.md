@@ -207,16 +207,31 @@ docker ps
 docker compose up -d bitcoin
 
 # 🦀 Start the Rust API (Explorador Sigiloso)
-# This command will recompile if you changed any Rust code
+# This command recompiles if you changed any Rust code
 docker compose up -d --build explorador_api
 
-# ⚡ Start both (builds the API, but bitcoin will just start as-is)
+# 📦 Start the Esplora indexer service (rebuild if config or code changed)
+docker compose up -d --build esplora-indexer
+
+# ⚡ Start all services (Bitcoin + Explorador API + Esplora indexer)
 docker compose up -d --build
 
 # 🧘 View logs for live debugging
 docker logs -f bitcoin-mainnet
 docker logs -f explorador-api
+docker logs -f esplora-indexer
 ```
+
+---
+
+### 🧠 Quick Notes:
+
+- **Esplora indexer** uses data at `/mnt/bitcoin-data/esplora-db` on your SSD.
+- Only use `--build` if you actually changed Dockerfiles or source code.
+- Your existing Rust API (port 3000) proxies Esplora data via internal HTTP (`esplora-indexer:3002`).
+
+Now your command center is ready to handle the growing forest of services 🌲✨
+
 
 
 ---

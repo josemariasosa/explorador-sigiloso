@@ -7,7 +7,7 @@ services:
       - "8332:8332"  # RPC
       - "8333:8333"  # P2P
     volumes:
-      - /mnt/bitcoin-data/bitcoin-node:/home/bitcoin/.bitcoin
+      - /media/honey/bitcoin_data/bitcoin-node:/home/bitcoin/.bitcoin
     # This commands are now in the /mnt/bitcoin-data/bitcoin.conf file
     # command:
     #   -printtoconsole
@@ -47,7 +47,7 @@ services:
       - DB_DIR=/data
       - RUST_LOG=info                 # optional: more verbose logs
     volumes:
-      - /mnt/bitcoin-data/esplora-db:/data
+      - /media/honey/bitcoin_data/esplora-db:/data
     command:
       - bash
       - -c

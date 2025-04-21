@@ -1,5 +1,12 @@
 # Nodo Sigiloso Infra
 
+```bash
+      (\__/)
+     ( •_• )
+     / >⧈  Nodo
+       Sigiloso
+```
+
 > Infrastructure setup for running a full Bitcoin node and the [`explorador-sigiloso`](https://github.com/josemariasosa/explorador-sigiloso) dashboard on a local or dedicated Linux server (physical or virtual).
 
 ---
@@ -234,6 +241,42 @@ Now your command center is ready to handle the growing forest of services 🌲�
 
 
 
+# Next Steps for Your Geo‑Distributed Explorer 📡
+
+Key Management (Ethereum L2)
+
+Generate 3 independent node keys: centauri, libertad, sigiloso.
+
+Deploy a simple multi‑sig or committee contract on an Ethereum L2 (e.g., Arbitrum, Optimism).
+
+Each node signs state updates; the contract finalizes block roots or governance votes.
+
+Node Deployment Software
+
+Build a CLI/SDK in Rust (or your favorite language) that:
+
+Reads a config of node names + keys + regions.
+
+Auto‑generates Docker Compose (or Kubernetes) manifests.
+
+Boots bitcoind + Esplora + your Axum API on each machine.
+
+Provide templates for common cloud/VPS providers or bare‑metal.
+
+Local Copies & Redundancy
+
+Maintain a “cold‑standby” local copy of each node’s data for quick fail‑over.
+
+Automate snapshot + rsync tasks via cron or your deployment tool.
+
+Cost Optimization
+
+Use spot/low‑pri VMs or ARM‑based mini‑servers to minimize monthly spend.
+
+Leverage your NEAR grant yields to offset hosting costs.
+
+
+
 ---
 
 ### 🧠 Developer Notes (2025-04-19, Saturday Sync Magic)
@@ -264,6 +307,12 @@ Your only job now... is to **create more endpoints** 🧠🐿️🚀
 
 
 ---
+
+ssh nodo@10.0.2.15
+
+ssh username@10.0.2.15 -p 2222
+
+ssh username@127.0.0.1 -p 2222
 
 ---
 

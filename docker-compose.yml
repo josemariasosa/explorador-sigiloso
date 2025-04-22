@@ -58,7 +58,6 @@ services:
         --http-addr=0.0.0.0:3000
         --monitoring-addr=0.0.0.0:4224
         --electrum-rpc-addr=0.0.0.0:50001
-        --log-filters=INFO
         --db-dir=/data/electrs_bitcoin_db/mainnet
     ports:
       - "3000:3000"   # HTTP API

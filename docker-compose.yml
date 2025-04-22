@@ -51,8 +51,15 @@ services:
       - bash
       - -c
       - >
-        /srv/explorer/run.sh bitcoin-mainnet explorer
+        /srv/explorer/electrs_bitcoin/bin/electrs
+        --network bitcoin
         --daemon-rpc-addr=bitcoin:8332
         --cookie=bitcoin:bitcoin123
+        --http-addr=0.0.0.0:3000
+        --monitoring-addr=0.0.0.0:4224
+        --electrum-rpc-addr=0.0.0.0:50001
+        --log-filters=INFO
+        --db-dir=/data/electrs_bitcoin_db/mainnet
     ports:
-      - "8080:80"        # HTTP UI + API
+      - "3000:3000"   # HTTP API
+      # - "8080:80"        # HTTP UI + API

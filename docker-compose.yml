@@ -29,8 +29,6 @@ services:
       BTC_RPC_USER: bitcoin
       BTC_RPC_PASS: bitcoin123
     command: ["cargo", "run", "--release"]
-    depends_on:
-      - bitcoin
 
   # Esplora indexer (backend)
   esplora-indexer:

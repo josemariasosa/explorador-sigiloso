@@ -25,9 +25,26 @@ pub struct BlockDelta {
 #[derive(Clone)]
 pub struct AppState {
     /// Bitcoin‐Core RPC client
-    pub btc: Arc<BtcRpcClient>,
+    pub btc: Option<Arc<BtcRpcClient>>,
     /// an HTTP client for Esplora
-    pub esplora: HttpClient,
+    pub esplora: Option<HttpClient>,
     /// base URL for the Esplora‐indexer service
-    pub esplora_url: String,
+    pub esplora_url: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct BitcoinNodeStatus {
+    pub is_client_ok: bool,
+    pub is_running: bool,
+    /// @dev height of the local Bitcoin node
+    pub local_height: u64,
+    /// @dev height of the Bitcoin network
+    pub vendor_height: u64,
+}
+
+#[derive(Serialize)]
+pub struct AppStatus {
+    pub bitcoin_node: BitcoinNodeStatus,
+    pub esplora_ok: bool,
+    pub external_height: Option<u64>,
 }

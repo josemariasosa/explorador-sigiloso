@@ -7,38 +7,67 @@ use crate::types::{BlockDelta, BalanceResponse, AppState};
 use crate::utils::expected_block_subsidy;
 use std::collections::HashMap;
 use reqwest::StatusCode;
-use serde_json::Value;
 
 pub async fn get_balance(
     Path(address): Path<String>,
     State(state): State<AppState>,
-) -> Json<BalanceResponse> {
-    // List unspent and filter by address
-    let address: Address<NetworkUnchecked> = address.parse().unwrap();
-    let address: Address<NetworkChecked> = address.require_network(Network::Bitcoin).unwrap();
-    let unspent = state.btc.list_unspent(
+) -> Result<Json<BalanceResponse>, (StatusCode, String)> {
+    let Some(btc_client) = &state.btc else {
+        return Err((StatusCode::SERVICE_UNAVAILABLE, "Bitcoin RPC unavailable".to_string()));
+    };
+
+    let address: Address<NetworkUnchecked> = address.parse().map_err(|_| {
+        (StatusCode::BAD_REQUEST, "Invalid Bitcoin address".to_string())
+    })?;
+    let address: Address<NetworkChecked> = address.require_network(Network::Bitcoin).map_err(|_| {
+        (StatusCode::BAD_REQUEST, "Invalid network for address".to_string())
+    })?;
+
+    let unspent = btc_client.list_unspent(
         None,
         None,
         Some(&[&address]),
         None,
         None
-    ).expect("Failed to query unspent outputs");
+    ).map_err(|e| {
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("BTC RPC error: {}", e))
+    })?;
 
     let balance: u64 = unspent.iter().map(|o| o.amount.to_sat()).sum();
-    Json(BalanceResponse {address: address.to_string(), balance})
+
+    Ok(Json(BalanceResponse {
+        address: address.to_string(),
+        balance,
+    }))
 }
 
-pub async fn get_last_block_delta(State(state): State<AppState>) -> Json<BlockDelta> {
-    let best_block_hash = state.btc.get_best_block_hash().expect("Failed to get best block");
-    get_block_delta_core(state.btc.as_ref(), &best_block_hash)
+pub async fn get_last_block_delta(
+    State(state): State<AppState>
+) -> Result<Json<BlockDelta>, (StatusCode, String)> {
+    let Some(btc) = state.btc.as_ref() else {
+        return Err((StatusCode::SERVICE_UNAVAILABLE, "Bitcoin RPC unavailable".to_string()));
+    };
+
+    let best_block_hash = btc.get_best_block_hash().map_err(|e| {
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to get best block: {e}"))
+    })?;
+
+    Ok(get_block_delta_core(btc, &best_block_hash))
 }
 
 pub async fn get_block_delta(
     Path(block_hash): Path<String>,
     State(state): State<AppState>,
-) -> Json<BlockDelta> {
-    let block_hash: BlockHash = block_hash.parse().expect("Invalid block hash");
-    get_block_delta_core(state.btc.as_ref(), &block_hash)
+) -> Result<Json<BlockDelta>, (StatusCode, String)> {
+    let Some(btc) = state.btc.as_ref() else {
+        return Err((StatusCode::SERVICE_UNAVAILABLE, "Bitcoin RPC unavailable".to_string()));
+    };
+
+    let block_hash: BlockHash = block_hash.parse().map_err(|_| {
+        (StatusCode::BAD_REQUEST, "Invalid block hash".to_string())
+    })?;
+
+    Ok(get_block_delta_core(btc, &block_hash))
 }
 
 fn get_block_delta_core(btc: &BtcRpcClient, block_hash: &BlockHash) -> Json<BlockDelta> {
@@ -108,22 +137,22 @@ fn get_block_delta_core(btc: &BtcRpcClient, block_hash: &BlockHash) -> Json<Bloc
 
 
 
-pub async fn block_txs_esplora(
-    Path(block_hash): Path<String>,
-    State(state): State<AppState>,
-) -> Result<Json<Value>, (StatusCode, String)> {
-    // call Esplora’s /api/block/:hash/txs
-    let url = format!("{}/api/block/{}/txs", state.esplora_url, block_hash);
-    let resp = state.esplora
-        .get(&url)
-        .send()
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+// pub async fn block_txs_esplora(
+//     Path(block_hash): Path<String>,
+//     State(state): State<AppState>,
+// ) -> Result<Json<Value>, (StatusCode, String)> {
+//     // call Esplora’s /api/block/:hash/txs
+//     let url = format!("{}/api/block/{}/txs", state.esplora_url, block_hash);
+//     let resp = state.esplora
+//         .get(&url)
+//         .send()
+//         .await
+//         .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
 
-    let body: Value = resp
-        .json()
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+//     let body: Value = resp
+//         .json()
+//         .await
+//         .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
 
-    Ok(Json(body))
-}
+//     Ok(Json(body))
+// }

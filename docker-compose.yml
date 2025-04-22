@@ -50,6 +50,9 @@ services:
     command:
       - bash
       - -c
-      - /srv/explorer/run.sh bitcoin-mainnet explorer
+      - >
+        /srv/explorer/run.sh bitcoin-mainnet explorer
+        --daemon-rpc-addr=bitcoin:8332
+        --cookie=bitcoin:bitcoin123
     ports:
       - "8080:80"        # HTTP UI + API

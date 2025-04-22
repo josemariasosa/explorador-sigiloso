@@ -44,6 +44,7 @@ services:
       - BITCOIN_RPC_PASS=bitcoin123
       - DB_DIR=/data
       - RUST_LOG=info                 # optional: more verbose logs
+      - DEBUG=verbose                 # optional: more verbose logs
     volumes:
       - /media/honey/bitcoin_data/esplora-db:/data
     command:
@@ -51,4 +52,4 @@ services:
       - -c
       - /srv/explorer/run.sh bitcoin-mainnet explorer
     ports:
-      - "3002:3002"
+      - "8080:80"        # HTTP UI + API

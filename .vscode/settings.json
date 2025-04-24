@@ -1,11 +1,15 @@
 {
     "cSpell.words": [
         "bitcoincore",
+        "chrono",
         "dotenv",
         "dotenvy",
         "esplora",
         "explorador",
+        "pgdata",
         "reqwest",
+        "serde",
+        "sqlx",
         "txdata",
         "vout"
     ]

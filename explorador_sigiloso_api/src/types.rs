@@ -1,7 +1,10 @@
 use serde::Serialize;
+use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use bitcoincore_rpc::Client as BtcRpcClient;
 use reqwest::Client as HttpClient;
+use crate::models::Follower;
+use tokio::sync::mpsc;
 
 #[derive(Serialize)]
 pub struct BalanceResponse {
@@ -24,12 +27,16 @@ pub struct BlockDelta {
 
 #[derive(Clone)]
 pub struct AppState {
+    /// Explorador Postgres connection pool
+    pub db: Option<Arc<Pool<Postgres>>>,
     /// Bitcoin‐Core RPC client
     pub btc: Option<Arc<BtcRpcClient>>,
     /// an HTTP client for Esplora
     pub esplora: Option<HttpClient>,
     /// base URL for the Esplora‐indexer service
     pub esplora_url: Option<String>,
+    /// if you have a job queue
+    pub job_tx: mpsc::Sender<Follower>,
 }
 
 #[derive(Serialize)]

@@ -30,35 +30,43 @@ services:
       BTC_RPC_PASS: bitcoin123
     command: ["cargo", "run", "--release"]
 
-  # Esplora indexer (backend)
-  esplora-indexer:
-    image: blockstream/esplora:latest
-    container_name: esplora-indexer
+  postgres:
+    image: postgres:17
+    container_name: explorador-db
     restart: unless-stopped
-    depends_on:
-      - bitcoin
-    environment:
-      - NETWORK=bitcoin-mainnet
-      - BITCOIN_RPC_URL=http://bitcoin:8332
-      - BITCOIN_RPC_USER=bitcoin
-      - BITCOIN_RPC_PASS=bitcoin123
-      - DB_DIR=/data
-      - RUST_LOG=info                 # optional: more verbose logs
-      - DEBUG=verbose                 # optional: more verbose logs
-    volumes:
-      - /media/honey/bitcoin_data/esplora-db:/data
-    command:
-      - bash
-      - -c
-      - >
-        /srv/explorer/electrs_bitcoin/bin/electrs
-        --network bitcoin
-        --daemon-rpc-addr=bitcoin:8332
-        --cookie=bitcoin:bitcoin123
-        --http-addr=0.0.0.0:3000
-        --monitoring-addr=0.0.0.0:4224
-        --electrum-rpc-addr=0.0.0.0:50001
-        --db-dir=/data/electrs_bitcoin_db/mainnet
     ports:
-      - "3000:3000"   # HTTP API
-      # - "8080:80"        # HTTP UI + API
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: explorador
+      POSTGRES_PASSWORD: explorador123
+      POSTGRES_DB: explorador_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+
+  # # Esplora indexer (backend)
+  # esplora-indexer:
+  #   image: blockstream/esplora:latest
+  #   container_name: esplora-indexer
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - bitcoin
+  #   environment:
+  #     - NETWORK=bitcoin-mainnet
+  #     - BITCOIN_RPC_URL=http://bitcoin:8332
+  #     - BITCOIN_RPC_USER=bitcoin
+  #     - BITCOIN_RPC_PASS=bitcoin123
+  #     - DB_DIR=/data
+  #     - RUST_LOG=info                 # optional: more verbose logs
+  #     - DEBUG=verbose                 # optional: more verbose logs
+  #   volumes:
+  #     - /media/honey/bitcoin_data/esplora-db:/data
+  #   command:
+  #     - bash
+  #     - -c
+  #     - /srv/explorer/run.sh bitcoin-mainnet explorer
+  #   ports:
+  #     - "8080:80"        # HTTP UI + API
+

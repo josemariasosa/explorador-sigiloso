@@ -453,3 +453,27 @@ Now your Esplora indexer has a stable home on the SSD—no surprises when you sp
 
 
 Made with ☕, 🧠, and a squirrel’s stubbornness.
+
+
+use tokio::sync::mpsc;
+
+#[tokio::main]
+async fn main() {
+    let (tx, mut rx) = mpsc::channel(100);
+
+    tokio::spawn(async move {
+        for i in 0..10 {
+            if let Err(_) = tx.send(i).await {
+                println!("receiver dropped");
+                return;
+            }
+        }
+    });
+
+    while let Some(i) = rx.recv().await {
+        println!("got = {}", i);
+    }
+}
+
+
+sqlx migrate add create-scheduled-job-log

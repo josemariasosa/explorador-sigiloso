@@ -14,10 +14,10 @@ pub async fn try_connect_postgres() -> Option<Arc<Pool<Postgres>>> {
         .ok()
         .map(Arc::new);
 
-    sqlx::migrate!()
-        .run(&pool)
-        .await
-        .expect("Failed to run migrations");
+    // sqlx::migrate!()
+    //     .run(&pool)
+    //     .await
+    //     .expect("Failed to run migrations");
 
     pool
 }

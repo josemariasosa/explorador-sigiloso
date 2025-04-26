@@ -3,7 +3,7 @@ use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 use bitcoincore_rpc::Client as BtcRpcClient;
 use reqwest::Client as HttpClient;
-use crate::models::Follower;
+use crate::models::follower::Follower;
 use tokio::sync::mpsc;
 
 #[derive(Serialize)]

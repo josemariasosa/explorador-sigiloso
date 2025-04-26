@@ -14,3 +14,10 @@ cargo install sqlx-cli --no-default-features --features postgres
 DATABASE_URL=postgres://explorador:explorador123@postgres:5432/explorador_db
 
 echo $DATABASE_URL
+
+
+usa este comando.
+
+```sh
+$ DATABASE_URL=postgres://explorador:explorador123@localhost:5432/explorador_db sqlx migrate run
+```

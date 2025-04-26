@@ -1,18 +1,18 @@
 use axum::{
     extract::{Extension, Path},
     http::StatusCode,
-    response::IntoResponse,
+    // response::IntoResponse,
     Json,
 };
 use std::sync::Arc;
-use chrono::Utc;
-use crate::models::follower::Follower;
-use crate::types::AppState;
+// use chrono::Utc;
+// use crate::models::follower::Follower;
+use crate::app_state::AppState;
 use crate::models::scheduled_jobs::ScheduledJobLog;
 
 pub async fn refresh_user_data(
-    Path(user_id): Path<u64>,                   // use u64 to match your BIGSERIAL
-    Extension(state): Extension<Arc<AppState>>,
+    Path(_user_id): Path<u64>,                   // use u64 to match your BIGSERIAL
+    Extension(_state): Extension<Arc<AppState>>,
 ) -> Result<Json<Vec<ScheduledJobLog>>, (StatusCode, String)> {
     todo!();
     // 1) Fetch all followers for this user
@@ -49,6 +49,6 @@ pub async fn refresh_user_data(
     // }
 
     // 3) Return 202 Accepted with our logs
-    let mut logs = Vec::with_capacity(10); // WARNIG, don not use this code.
-    Ok(Json(logs))
+    // let mut logs = Vec::with_capacity(10); // WARNIG, don not use this code.
+    // Ok(Json(logs))
 }

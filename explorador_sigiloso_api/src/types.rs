@@ -6,6 +6,26 @@ use reqwest::Client as HttpClient;
 use crate::models::follower::Follower;
 use tokio::sync::mpsc;
 
+pub type BasisPoint = u32;
+
+/// *****************
+/// * API Responses *
+/// *****************
+
+#[derive(Serialize)]
+pub struct NearValidatorResponse {
+    pub is_online: bool,
+    pub validator_id: String,
+    pub factory_id: String,
+    pub owner_id: String,
+    pub total_staked_balance: u64,
+    pub reward_fee_bp: u64,
+    pub next_reward_fee_bp: u64,
+    pub burn_fee_bp: u64,
+    pub farms: Vec<u8>, // TODO: Define the structure of farms
+    pub snapshot_at: String,
+}
+
 #[derive(Serialize)]
 pub struct BalanceResponse {
     pub address: String,
@@ -23,20 +43,6 @@ pub struct BlockDelta {
     pub spent_addresses: Vec<(String, u64)>,
     pub total_output_sats: u64,
     pub total_input_sats: u64,
-}
-
-#[derive(Clone)]
-pub struct AppState {
-    /// Explorador Postgres connection pool
-    pub db: Option<Arc<Pool<Postgres>>>,
-    /// Bitcoin‐Core RPC client
-    pub btc: Option<Arc<BtcRpcClient>>,
-    /// an HTTP client for Esplora
-    pub esplora: Option<HttpClient>,
-    /// base URL for the Esplora‐indexer service
-    pub esplora_url: Option<String>,
-    /// if you have a job queue
-    pub job_tx: mpsc::Sender<Follower>,
 }
 
 #[derive(Serialize)]

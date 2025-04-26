@@ -1,5 +1,6 @@
 use axum::{extract::State, Json};
-use crate::types::{AppStatus, AppState};
+use crate::types::AppStatus;
+use crate::app_state::AppState;
 
 pub async fn get_app_status(
     State(_state): State<AppState>,

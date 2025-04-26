@@ -1,12 +1,16 @@
 use axum::{extract::{Path, State}, Json};
 use bitcoin::address::{NetworkUnchecked, NetworkChecked};
 use bitcoin::{Address, BlockHash, Network};
-use bitcoincore_rpc::RpcApi;
 use bitcoincore_rpc::Client as BtcRpcClient;
-use crate::types::{BlockDelta, BalanceResponse, AppState};
+use bitcoincore_rpc::RpcApi;
+use crate::app_state::AppState;
+use crate::types::{BlockDelta, BalanceResponse};
 use crate::utils::expected_block_subsidy;
-use std::collections::HashMap;
 use reqwest::StatusCode;
+use std::collections::HashMap;
+
+/// btc - handlers
+/// Centauri Devs ✨
 
 pub async fn get_balance(
     Path(address): Path<String>,

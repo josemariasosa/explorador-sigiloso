@@ -27,3 +27,5 @@ pub struct NearValidatorStatus {
     pub farms: serde_json::Value,
     // snapshot_at: chrono::NaiveDateTime,
 }
+
+let u = PgU128::from_str("1234567890123456789012345678901234567890").unwrap();

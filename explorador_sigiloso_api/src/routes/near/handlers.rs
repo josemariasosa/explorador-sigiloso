@@ -18,6 +18,7 @@ use near_primitives::views::QueryRequest;
 use near_primitives::types::AccountId;
 use methods::query::RpcQueryRequest;
 use crate::models::near::NearValidatorStatus;
+use sqlx_pg_uint::PgU128;
 
 /// near - handlers
 /// Centauri Devs ✨
@@ -63,15 +64,21 @@ pub async fn get_and_update_near_validator_stats(
         _ => return Err((StatusCode::INTERNAL_SERVER_ERROR, "Unexpected RPC response".into())),
     };
 
+    let total_staked_balance: u128 = summary["total_staked_balance"]
+        .as_str()
+        .ok_or((StatusCode::INTERNAL_SERVER_ERROR, "Invalid total_staked_balance".to_string()))?
+        .parse::<u128>()
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Parse error: {}", e)))?;
+
     let near_validator_stat = NearValidatorStatus {
         validator_id: near_address.to_string(),
         owner_id: summary["owner"].as_str().unwrap_or("").to_string(),
-        total_staked_balance: let u = PgU128::from_str("1234567890123456789012345678901234567890").unwrap();PG128::from(summary["total_staked_balance"].as_str())//.unwrap_or("0").parse::<u128>(),
+        total_staked_balance: PgU128::from(total_staked_balance),
         reward_fee_bp: crate::utils::get_basis_point_from(
             summary["reward_fee_bp"]["numerator"].as_u64().unwrap_or(0),
             summary["reward_fee_bp"]["denominator"].as_u64().unwrap_or(0),
         ),
-        next_reward_fee_fraction: crate::utils::get_basis_point_from(
+        next_reward_fee_bp: crate::utils::get_basis_point_from(
             summary["next_reward_fee_fraction"]["numerator"].as_u64().unwrap_or(0),
             summary["next_reward_fee_fraction"]["denominator"].as_u64().unwrap_or(0),
         ),

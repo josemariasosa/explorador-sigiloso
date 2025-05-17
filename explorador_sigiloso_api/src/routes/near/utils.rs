@@ -7,3 +7,10 @@
 //     }
 //     Ok(address.to_string())
 // }
+
+pub fn is_near_mainnet(address: &str) -> bool {
+    match near_sdk::AccountId::validate(&address) {
+        Ok(_) => true,
+        Err(_) => false,
+    }
+}

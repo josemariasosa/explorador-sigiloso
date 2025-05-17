@@ -12,6 +12,7 @@ use axum::Router;
 use routes::btc;
 use routes::indexer;
 use routes::near;
+use routes::user;
 use app_state::AppState;
 
 
@@ -24,7 +25,7 @@ async fn main() {
 
     // build our application with a multiple routes
     let app = Router::new()
-        .route("/api/user/{identity_type}", get(btc::handlers::get_user_home))
+        .route("/api/user/{identifier}", get(user::handlers::get_user_home))
 
 
         .route("/btc/balance/{address}", get(btc::handlers::get_balance))

@@ -1,5 +1,5 @@
 pub mod rpc;
 pub mod handlers;
 
-mod utils;
+pub mod utils;
 mod types;

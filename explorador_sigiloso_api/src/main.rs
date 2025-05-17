@@ -24,6 +24,9 @@ async fn main() {
 
     // build our application with a multiple routes
     let app = Router::new()
+        .route("/api/user/{identity_type}", get(btc::handlers::get_user_home))
+
+
         .route("/btc/balance/{address}", get(btc::handlers::get_balance))
         // .route("/btc/block-txs/{block_hash}", get(btc::handlers::block_txs_esplora))
         .route("/btc/last-block-delta", get(btc::handlers::get_last_block_delta))

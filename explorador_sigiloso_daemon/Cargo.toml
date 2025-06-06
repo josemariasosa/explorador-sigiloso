@@ -1,0 +1,37 @@
+[package]
+name = "explorador_sigiloso_daemon"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full", "sync"] }
+bitcoincore-rpc = "0.19.0"
+bitcoin = "0.32.5"
+dotenvy = "0.15"
+# Enable JSON + TLS support (or native-tls, rustls, whatever you prefer)
+reqwest = { version = "0.12.15", features = ["json", "rustls-tls"] }
+
+# tokio (no TLS). Read more at https://github.com/launchbadge/sqlx?tab=readme-ov-file#install
+sqlx = { version = "0.8", features = [ "runtime-tokio" , "postgres"] }
+sqlx-pg-uint = "0.9.0"
+
+chrono = { version = "0.4.40", features = ["serde", "clock"] }
+
+near-jsonrpc-client = "0.16.1"
+near-primitives = "0.29.2"
+near-jsonrpc-primitives = "0.29.2"
+
+# for the daemon!
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+bollard = "0.15"              # For Docker control
+sysinfo = "0.30"              # For system health
+tokio-util = "0.7"
+thiserror = "1.0"
+
+# Optional: Prometheus integration
+prometheus = "0.13"

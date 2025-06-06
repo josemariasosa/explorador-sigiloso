@@ -7,6 +7,31 @@
        Sigiloso
 ```
 
+v2
+
+🧠 Architecture Overview
+
+explorador_sigiloso_safe/     # Runs in a Docker container, securely stores keys
+└── Listens on UNIX socket or TCP (local only)
+└── Exposes internal API: derive keys, sign txs, get addresses
+
+explorador_sigiloso_api/      # Public Axum HTTP API
+└── Talks to _safe via RPC or channel
+└── Handles external requests like "send BTC", "get ETH addr", etc.
+
+🌐 🧠 “The Hivemind Forest” — High-Level Architecture
+Imagine a decentralized set of node operators with:
+
+Local autonomy (each squirrel runs its own daemon + supervisor)
+
+Global coordination (they gossip and share state)
+
+Shared economic fallback (insurance / shared fund via a Safe multisig)
+
+This architecture makes your node mesh fault-tolerant, adaptive, and economically sustainable.
+
+
+
 > Infrastructure setup for running a full Bitcoin node and the [`explorador-sigiloso`](https://github.com/josemariasosa/explorador-sigiloso) dashboard on a local or dedicated Linux server (physical or virtual).
 
 ---

@@ -42,6 +42,35 @@ impl NodeClient for BtcClient {
         }
     }
 
+    async fn fetch_log_tail(&self, lines: usize) -> Vec<String> {
+        use bollard::container::LogsOptions;
+        use futures_util::stream::TryStreamExt;
+
+        let mut logs = self.docker.logs(
+            &self.container_name,
+            Some(LogsOptions::<String> {
+                stdout: true,
+                stderr: true,
+                tail: lines.to_string(),
+                follow: false,
+                ..Default::default()
+            })
+        );
+
+        let mut result = Vec::new();
+        while let Some(Ok(log)) = logs.try_next().await {
+            match log {
+                bollard::container::LogOutput::StdOut { message }
+                | bollard::container::LogOutput::StdErr { message } => {
+                    result.push(String::from_utf8_lossy(&message).to_string());
+                }
+                _ => {}
+            }
+        }
+
+        result
+    }
+
     async fn fetch_log_tail(&self, _lines: usize) -> Vec<String> {
         // Optional: Implement log reading with docker logs
         vec![]
@@ -52,36 +81,34 @@ impl NodeClient for BtcClient {
             .await
             .map_err(|e| format!("Restart failed: {}", e))
     }
+
+    pub async fn run_bitcoin_cli(&self, args: Vec<&str>) -> Result<String, String> {
+        let create = CreateExecOptions {
+            attach_stdout: Some(true),
+            attach_stderr: Some(true),
+            cmd: Some(["bitcoin-cli"].iter().chain(args.iter()).map(|s| s.to_string()).collect()),
+            ..Default::default()
+        };
+
+        let exec = self.docker.create_exec(&self.container_name, create)
+            .await.map_err(|e| format!("CreateExec failed: {}", e))?;
+
+        let output = self.docker.start_exec(&exec.id, None::<StartExecOptions>)
+            .await.map_err(|e| format!("StartExec failed: {}", e))?;
+
+        let mut result = String::new();
+        match output {
+            bollard::exec::StartExecResults::Attached { mut output, .. } => {
+                use futures_util::stream::TryStreamExt;
+                while let Some(Ok(msg)) = output.try_next().await {
+                    if let bollard::container::LogOutput::StdOut { message } = msg {
+                        result.push_str(&String::from_utf8_lossy(&message));
+                    }
+                }
+            }
+            _ => {}
+        }
+
+        Ok(result.trim().to_string())
+    }
 } 
-
-
-//     pub async fn run_bitcoin_cli(&self, args: Vec<&str>) -> Result<String, String> {
-//         let create = CreateExecOptions {
-//             attach_stdout: Some(true),
-//             attach_stderr: Some(true),
-//             cmd: Some(["bitcoin-cli"].iter().chain(args.iter()).map(|s| s.to_string()).collect()),
-//             ..Default::default()
-//         };
-
-//         let exec = self.docker.create_exec(&self.container_name, create)
-//             .await.map_err(|e| format!("CreateExec failed: {}", e))?;
-
-//         let output = self.docker.start_exec(&exec.id, None::<StartExecOptions>)
-//             .await.map_err(|e| format!("StartExec failed: {}", e))?;
-
-//         let mut result = String::new();
-//         match output {
-//             bollard::exec::StartExecResults::Attached { mut output, .. } => {
-//                 use futures_util::stream::TryStreamExt;
-//                 while let Some(Ok(msg)) = output.try_next().await {
-//                     if let bollard::container::LogOutput::StdOut { message } = msg {
-//                         result.push_str(&String::from_utf8_lossy(&message));
-//                     }
-//                 }
-//             }
-//             _ => {}
-//         }
-
-//         Ok(result.trim().to_string())
-//     }
-// }
